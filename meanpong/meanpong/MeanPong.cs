@@ -26,8 +26,8 @@ namespace MeanPong
         private enum GameState { Splash, Help, NotReady, Playing, PlayerPoint, AIPoint, PlayerWon, PlayerLost, Credits, Closing };
         private GameState _gameState = GameState.Splash;
         private Texture2D _splash;
-        private int _playerScore = 0;
-        private int _aiScore = 0;
+        private int _playerScore = 7;
+        private int _aiScore = 7;
         private SpriteFont _font;
         private SpriteFont _gameEndHeadingFont;
         private SoundEffect _paddleCollidePlayer;
@@ -184,9 +184,12 @@ namespace MeanPong
                     break;
 
                 case GameState.PlayerWon:
-
+                    DrawPlayerWon();
                     break;
 
+                case GameState.PlayerLost:
+                    DrawPlayerLost();
+                    break;
             }
 
             _spriteBatch.End();
@@ -379,27 +382,30 @@ namespace MeanPong
         {
             if (!_gameEndedAt.HasValue)
             {
+                Debug.WriteLine("GameOver: gameEndedAt has no value");
                 _gameEndedAt = DateTime.Now;
             }
-            else if (_gameEndedAt.Value + _gameEndDuration < DateTime.Now)
+            else if (_gameEndedAt.Value + _gameEndDuration > DateTime.Now)
             {
+                Debug.WriteLine("GameOver: gameEndedAt + gameEndDuration > DateTime.Now");
                 ; // Do nothing
             }
             else
             {
+                Debug.WriteLine("GameOver: going to credits state");
                 _gameState = GameState.Credits;
             }
         }
 
         private void DrawPlayerWon()
         {
-            string msg = "YOU WIN";
+            string msg = "I'M SOOO IMPRESSED";
             DrawGameEndMessage(msg);
         }
 
         private void DrawPlayerLost()
         {
-            string msg = "YOU LOSE";
+            string msg = "YOU SUCK!";
             DrawGameEndMessage(msg);
         }
 
