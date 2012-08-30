@@ -29,6 +29,7 @@ namespace MeanPong
         private int _playerScore = 0;
         private int _aiScore = 0;
         private SpriteFont _font;
+        private SpriteFont _gameEndHeadingFont;
         private SoundEffect _paddleCollidePlayer;
         private SoundEffect _paddleCollideAi;
         private SoundEffect _wallCollide;
@@ -40,6 +41,8 @@ namespace MeanPong
         private DateTime _playerScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime _prevAIScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime _prevPlayerScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
+        private DateTime? _gameEndedAt;
+        private TimeSpan _gameEndDuration = new TimeSpan(0, 0, 4);
 
         public MeanPong()
         {
@@ -83,6 +86,7 @@ namespace MeanPong
 
             _splash = Content.Load<Texture2D>("splash");
             _font = Content.Load<SpriteFont>("ScoreFont");
+            _gameEndHeadingFont = Content.Load<SpriteFont>("GameEndHeading");
 
             _paddleCollidePlayer = Content.Load<SoundEffect>("paddle_collide_player");
             _paddleCollideAi = Content.Load<SoundEffect>("paddle_collide_ai");
@@ -135,6 +139,14 @@ namespace MeanPong
                 case GameState.AIPoint:
                     UpdateAIPoint(kbs, gameTime);
                     break;
+
+                case GameState.PlayerWon:
+                    UpdatePlayerWon();
+                    break;
+
+                case GameState.PlayerLost:
+                    UpdatePlayerLost();
+                    break;
             }
 
             base.Update(gameTime);
@@ -171,6 +183,10 @@ namespace MeanPong
                     DrawScore();
                     break;
 
+                case GameState.PlayerWon:
+
+                    break;
+
             }
 
             _spriteBatch.End();
@@ -181,10 +197,7 @@ namespace MeanPong
         private void UpdatePlaying(KeyboardState kbs, GameTime gameTime)
         {
             UpdatePlayerInput(kbs, gameTime);
-
-            _ball.Position.X += _ball.Velocity.X;
-            _ball.Position.Y += _ball.Velocity.Y;
-
+            UpdateBall();
             UpdateAI(gameTime);
 
             Rectangle playerRect = _player.GetRect();
@@ -350,6 +363,50 @@ namespace MeanPong
                     _gameState = GameState.PlayerLost;
                 }
             }
+        }
+
+        private void UpdatePlayerWon()
+        {
+            GameOver();
+        }
+
+        private void UpdatePlayerLost()
+        {
+            GameOver();
+        }
+
+        private void GameOver()
+        {
+            if (!_gameEndedAt.HasValue)
+            {
+                _gameEndedAt = DateTime.Now;
+            }
+            else if (_gameEndedAt.Value + _gameEndDuration < DateTime.Now)
+            {
+                ; // Do nothing
+            }
+            else
+            {
+                _gameState = GameState.Credits;
+            }
+        }
+
+        private void DrawPlayerWon()
+        {
+            string msg = "YOU WIN";
+            DrawGameEndMessage(msg);
+        }
+
+        private void DrawPlayerLost()
+        {
+            string msg = "YOU LOSE";
+            DrawGameEndMessage(msg);
+        }
+
+        private void DrawGameEndMessage(string msg)
+        {
+            Vector2 msgDimensions = _gameEndHeadingFont.MeasureString(msg);
+            _spriteBatch.DrawString(_gameEndHeadingFont, msg, new Vector2(_court.Width / 2 - msgDimensions.X / 2, _court.Height / 2 - msgDimensions.Y / 2), Color.White);
         }
 
         private void UpdateBall()
