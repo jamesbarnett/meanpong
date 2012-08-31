@@ -28,21 +28,49 @@ namespace MeanPong
         private Texture2D _splash;
         private int _playerScore = 7;
         private int _aiScore = 7;
+        private Color _meanGreen;
         private SpriteFont _font;
         private SpriteFont _gameEndHeadingFont;
+        private SpriteFont _creditsFont;
         private SoundEffect _paddleCollidePlayer;
         private SoundEffect _paddleCollideAi;
         private SoundEffect _wallCollide;
         private SoundEffect _aiScoreSound;
         private SoundEffect _playerScoreSound;
+        private float _creditsBaseY;
 
-        //picked an arbitrary date in past at random since any will do :)
+        private List<string> _creditLines = new List<string>
+        {
+            "Programming by jamesb43.",
+            "Also blame jamesb43 for bad voice acting.",
+            "Thanks to DrPetter for sfxr (http://www.drpetter.se/project_sfxr.html)",
+            "I used sfxr to make the ball/paddle/wall collision sounds",
+            "Thanks to Yannick Lemieux via SoundBible.com",
+            "I used Yannicks Lemieux's small crowd applause for a player point.",
+            "Thanks to freesounds.org.",
+            "Thanks to the /r/gamedev community for being awesome. :)",
+            "And a special thanks to the /r/gamedev redditor, whom I couldn't track down",
+            "despite considerable effort.",
+            "(S)he commented on a typical \"How do I get started?\" post in /r/gamedev,",
+            "with \"build a pong clone!\", which is why I did this.",
+            "Best advice ever!",
+            "And most of all, thanks to my dad...",
+            "who wrote assembly for the PDP-11...",
+            "and yet still looks up movie listings in the local newspaper! :)"
+        };
+
+        private float _drawCreditsY;
+        private float _creditsYSpacing;
+        private List<Vector2> _creditLineSizes;
+
+        // I picked an arbitrary date in past at random since any will do. :)
         private DateTime _aiScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime _playerScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime _prevAIScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime _prevPlayerScoreSoundStart = new DateTime(2000, 1, 1, 0, 0, 0);
         private DateTime? _gameEndedAt;
-        private TimeSpan _gameEndDuration = new TimeSpan(0, 0, 4);
+        
+        private TimeSpan _gameEndDuration = new TimeSpan(0, 0, 2);
 
         public MeanPong()
         {
@@ -93,6 +121,12 @@ namespace MeanPong
             _wallCollide = Content.Load<SoundEffect>("wall_collide");
             _aiScoreSound = Content.Load<SoundEffect>("disappointed_crowd_idiot");
             _playerScoreSound = Content.Load<SoundEffect>("pleased_crowd_about_time");
+
+            _meanGreen = new Color(45, 198, 13);
+            _creditsFont = Content.Load<SpriteFont>("CreditsFont");
+            _creditsYSpacing = _creditsFont.MeasureString("X").Y * 0.2f ;
+            _creditsBaseY = _court.Height / 2.0f - _creditsYSpacing / 2.0f;
+            _creditLineSizes = _creditLines.ConvertAll(x => _creditsFont.MeasureString(x));
         }
 
         /// <summary>
@@ -147,6 +181,10 @@ namespace MeanPong
                 case GameState.PlayerLost:
                     UpdatePlayerLost();
                     break;
+
+                case GameState.Credits:
+                    UpdateCredits(kbs, gameTime);
+                    break;
             }
 
             base.Update(gameTime);
@@ -190,6 +228,11 @@ namespace MeanPong
                 case GameState.PlayerLost:
                     DrawPlayerLost();
                     break;
+
+                case GameState.Credits:
+                    DrawCredits();
+                    break;
+
             }
 
             _spriteBatch.End();
@@ -397,6 +440,11 @@ namespace MeanPong
             }
         }
 
+        private void UpdateCredits(KeyboardState kbs, GameTime gameTime)
+        {
+            _creditsBaseY -= 1.2f;
+        }
+
         private void DrawPlayerWon()
         {
             string msg = "I'M SOOO IMPRESSED";
@@ -412,7 +460,19 @@ namespace MeanPong
         private void DrawGameEndMessage(string msg)
         {
             Vector2 msgDimensions = _gameEndHeadingFont.MeasureString(msg);
-            _spriteBatch.DrawString(_gameEndHeadingFont, msg, new Vector2(_court.Width / 2 - msgDimensions.X / 2, _court.Height / 2 - msgDimensions.Y / 2), Color.White);
+            _spriteBatch.DrawString(_gameEndHeadingFont, msg, new Vector2(_court.Width / 2 - msgDimensions.X / 2, _court.Height / 2 - msgDimensions.Y / 2), _meanGreen);
+        }
+
+        private void DrawCredits()
+        {
+            int i = 0;
+
+            foreach (var line in _creditLines)
+            {
+                _spriteBatch.DrawString(_creditsFont, line, new Vector2(_court.Width / 2 - _creditLineSizes[i].X / 2, 
+                    _creditsBaseY + ((_creditLineSizes[i].Y + i) + i * _creditsYSpacing * 2.0f)), Color.White);
+                ++i;
+            }
         }
 
         private void UpdateBall()
