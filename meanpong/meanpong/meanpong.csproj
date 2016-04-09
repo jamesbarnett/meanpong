@@ -110,7 +110,9 @@
     <Compile Include="AIPaddle.cs" />
     <Compile Include="Ball.cs" />
     <Compile Include="Court.cs" />
+    <Compile Include="DrawLogger.cs" />
     <Compile Include="IPaddle.cs" />
+    <Compile Include="ParticleEffect.cs" />
     <Compile Include="PlayerPaddle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
